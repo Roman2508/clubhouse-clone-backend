@@ -30,7 +30,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     secret: 'bla bla bla',
-  })
+  }),
 )
 app.use(express.json())
 app.use(passport.initialize())
@@ -42,7 +42,7 @@ app.get('/auth/github', passport.authenticate('github'))
 app.get(
   '/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
-  authController.authCallback
+  authController.authCallback,
 )
 
 app.get('/auth/me', passport.authenticate('jwt', { session: false }), authController.getMe)
@@ -72,6 +72,7 @@ io.on('connection', (socket) => {
     const allUsers = getUsersFromRoom(rooms, roomId)
 
     io.in(`room/${roomId}`).emit('SERVER@ROOMS:JOINED', allUsers)
+    io.emit('SERVER@ROOMS:HOME', { users: allUsers, roomId })
     Room.update({ speakers: allUsers }, { where: { id: roomId } })
   })
 
@@ -83,6 +84,7 @@ io.on('connection', (socket) => {
       delete rooms[socket.id]
 
       const allUsers = getUsersFromRoom(rooms, roomId)
+      io.emit('SERVER@ROOMS:HOME', { users: allUsers, roomId })
       Room.update({ speakers: allUsers }, { where: { id: roomId } })
     }
   })
