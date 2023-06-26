@@ -49,6 +49,8 @@ app.post('/rooms', passport.authenticate('jwt', { session: false }), roomsContro
 app.get('/rooms/:id', passport.authenticate('jwt', { session: false }), roomsControllse.getRoomById)
 app.delete('/rooms/:id', passport.authenticate('jwt', { session: false }), roomsControllse.removeRoom)
 
-app.listen(3001, () => {
-  console.log('SERVER RUNNED!')
+const PORT = 3001
+
+app.listen(PORT, () => {
+  console.log('SERVER RUNNED ON PORT' + PORT)
 })
