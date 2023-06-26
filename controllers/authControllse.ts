@@ -14,11 +14,15 @@ type UserData = {
 
 export const getMe = async (req: express.Request, res: express.Response) => {
   try {
+    if (!req.user?.id) {
+      return res.status(404).json({ message: 'Не вдалось знайти користувача' })
+    }
+
     const user = await User.findOne({ where: { id: req.user.id } })
 
     res.json(user)
   } catch (error) {
-    res.status(500).json({ message: 'Some error' })
+    res.status(500).json({ message: 'Get me error' })
   }
 }
 
@@ -60,7 +64,8 @@ export const activate = async (req: express.Request, res: express.Response) => {
     if (req.user) {
       // @ts-ignore
       const userId = req.user.id
-      const smsCode = req.query.code
+      const smsCode = req.body.code
+      const user = req.body.user
 
       if (!smsCode) {
         return res.status(400).json({ message: 'Введіть код активації' })
@@ -75,7 +80,8 @@ export const activate = async (req: express.Request, res: express.Response) => {
           where: { code: smsCode, user_id: userId },
         })
 
-        await User.update({ isActive: 1 }, { where: { id: userId } })
+        // Оновлюю користувача
+        await User.update({ ...user, isActive: 1 }, { where: { id: userId } })
 
         res.status(201).json({ message: 'Акаунт активовано' })
       } else {
